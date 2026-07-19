@@ -7,6 +7,7 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
 ## [2026-07-19] - Otimizações Estéticas, Filtros, Layouts, Edição/Exclusão, Correção de RLS & Integração de Vendas
 
 ### Adicionado
+- Criado repositório remoto **sistema-vendas-v1** no GitHub sob a conta **Rodolfo-UXDEV** e feito o push completo do código-fonte na branch `main`.
 - Adicionado **botão Editar** (lápis padronizado) ao lado do status e do botão de pagamento em cada item da listagem de vendas.
 - Desenvolvido fluxo completo de **Edição de Vendas** com tela dedicada (`viewVenda === 'edit'`) contendo carregamento dinâmico de itens no carrinho de compras, alteração de quantidades, inserção de novos produtos e salvamento seguro no banco de dados.
 - Desenvolvida ação de **Exclusão de Vendas** na tela de edição, protegida por um **Modal de Confirmação de Segurança** (com backdrop embaçado e opções para prosseguir ou abortar).
