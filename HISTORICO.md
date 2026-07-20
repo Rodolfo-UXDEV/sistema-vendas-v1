@@ -104,8 +104,9 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
 ## [2026-07-20] - Correção de Compatibilidade para Deploy no GitHub Pages
 
 ### Modificado
-- [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Adicionada a propriedade `base: './'` para garantir que os arquivos JS e CSS compilações do Vite utilizem caminhos relativos ao invés de absolutos, resolvendo erros 404 no GitHub Pages.
-- [src/lib/supabase.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/lib/supabase.ts): Adicionados valores de fallback padrão para `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. Essa alteração impede que um `throw Error` desorganizado interrompa a montagem inicial do React na ausência de arquivos `.env` durante o processo de build/execução remota.
+- [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Ajustada a propriedade `base` para `'/sistema-vendas-v1/'` (caminho absoluto sob o nome do repositório) garantindo resolução correta de scripts JS e CSS no GitHub Pages com ou sem barra final na URL.
+- [package.json](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/package.json): Atualizado o script de build para copiar `dist/index.html` para `dist/404.html`, fornecendo fallback para recarregamentos de página em SPAs no GitHub Pages.
+- [src/lib/supabase.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/lib/supabase.ts): Adicionados valores de fallback padrão para `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
 
 ### Corrigido
-- **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React causado por variáveis de ambiente ausentes em ambiente de publicação.
+- **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React em amientes estáticos.
