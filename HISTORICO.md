@@ -104,10 +104,12 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
 ## [2026-07-20] - Correção de Compatibilidade para Deploy no GitHub Pages
 
 ### Modificado
+- [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx): Removida a renderização paralela da lista em cartões (`cart-cards-mobile`) no carrinho de compras, mantendo única e exclusivamente a exibição unificada em tabela (`cart-table-wrapper`).
 - [index.html](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/index.html): Adicionadas as diretrizes `translate="no"`, `class="notranslate"` e a meta tag `<meta name="google" content="notranslate" />` para impedir a tradução automática do Google Tradutor na aplicação.
 - [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Ajustada a propriedade `base` para `'/sistema-vendas-v1/'` (caminho absoluto sob o nome do repositório) garantindo resolução correta de scripts JS e CSS no GitHub Pages com ou sem barra final na URL.
 - [package.json](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/package.json): Atualizado o script de build para copiar `dist/index.html` para `dist/404.html`, fornecendo fallback para recarregamentos de página em SPAs no GitHub Pages.
 - [src/lib/supabase.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/lib/supabase.ts): Adicionados valores de fallback padrão para `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
 
 ### Corrigido
+- **Duplicação de Itens no Carrinho:** Removida a renderização dupla dos itens do carrinho (tabela + cards abaixo), unificando a exibição apenas na tabela superior.
 - **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React em amientes estáticos.
