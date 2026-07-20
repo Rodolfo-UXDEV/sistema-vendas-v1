@@ -98,3 +98,14 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
   - Validação do token de acesso pessoal (PAT) do GitHub configurado sob `github.token`, confirmando acesso a escopos essenciais (`repo`, `workflow`, `user`, etc.).
   - Identificada expiração do token configurado para **2026-07-23** (necessário renovar em breve).
   - Verificada a presença do Git (`version 2.54.0.windows.1`) e identificada a ausência da CLI do GitHub (`gh`).
+
+---
+
+## [2026-07-20] - Correção de Compatibilidade para Deploy no GitHub Pages
+
+### Modificado
+- [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Adicionada a propriedade `base: './'` para garantir que os arquivos JS e CSS compilações do Vite utilizem caminhos relativos ao invés de absolutos, resolvendo erros 404 no GitHub Pages.
+- [src/lib/supabase.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/lib/supabase.ts): Adicionados valores de fallback padrão para `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. Essa alteração impede que um `throw Error` desorganizado interrompa a montagem inicial do React na ausência de arquivos `.env` durante o processo de build/execução remota.
+
+### Corrigido
+- **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React causado por variáveis de ambiente ausentes em ambiente de publicação.
