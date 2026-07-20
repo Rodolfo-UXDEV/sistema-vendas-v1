@@ -568,21 +568,27 @@ body {
 /* Sub-abas de status (Pendentes vs Finalizadas) */
 .subtabs-container {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 .subtab-button {
+  flex: 1;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.825rem;
   font-weight: 600;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 0.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .subtab-button:hover {
@@ -602,16 +608,18 @@ body {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 0.75rem 1.25rem;
-  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-title {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -623,7 +631,7 @@ body {
   padding: 0.35rem 0.75rem;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color-scheme: dark;
 }
 
@@ -637,6 +645,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
 }
 
 .sale-item {
@@ -645,16 +654,19 @@ body {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.15rem;
   transition: all var(--transition-normal);
   gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
   .sale-item {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    padding: 1.25rem 1.5rem;
   }
 }
 
@@ -665,22 +677,80 @@ body {
 
 .sale-info {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 0.85rem;
   flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.sale-details {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .sale-details h3 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.25rem;
+  word-break: break-word;
 }
 
 .sale-details p {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-bottom: 0.15rem;
+  word-break: break-word;
+}
+
+.sale-products-box {
+  margin-top: 0.6rem;
+  background-color: var(--bg-primary);
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sale-products-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  margin-bottom: 0.3rem;
+}
+
+.sale-products-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sale-product-item {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sale-product-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+@media (max-width: 480px) {
+  .sale-product-name {
+    max-width: 140px;
+  }
 }
 
 .sale-date {
@@ -689,31 +759,53 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-wrap: wrap;
 }
 
 .sale-action-zone {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 0.75rem;
   width: 100%;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-color);
+  flex-wrap: wrap;
+}
+
+.sale-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 @media (min-width: 640px) {
   .sale-action-zone {
     width: auto;
     justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-top: 0;
+    border-top: none;
+    gap: 0.75rem;
   }
 }
 
 .sale-price-box {
-  text-align: right;
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .sale-price-box {
+    text-align: right;
+  }
 }
 
 .sale-total {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--accent);
 }
 
 .sale-qty {

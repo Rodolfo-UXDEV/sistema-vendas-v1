@@ -1574,12 +1574,12 @@ export default function App() {
                             Contato: {venda.clientes?.telefone || 'Sem telefone'}
                           </p>
                           
-                          <div style={{ marginTop: '0.5rem', backgroundColor: 'var(--bg-primary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                            <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Produtos:</p>
-                            <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                          <div className="sale-products-box">
+                            <p className="sale-products-title">Produtos:</p>
+                            <ul className="sale-products-list">
                               {venda.itens_venda?.map((item) => (
-                                <li key={item.id} style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                                  <span>• {item.produtos?.nome || 'Produto Removido'} ({item.quantidade}x)</span>
+                                <li key={item.id} className="sale-product-item">
+                                  <span className="sale-product-name">• {item.produtos?.nome || 'Produto Removido'} ({item.quantidade}x)</span>
                                   <span>{formatCurrency(item.quantidade * item.valor_unitario)}</span>
                                 </li>
                               ))}
@@ -1607,7 +1607,7 @@ export default function App() {
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div className="sale-action-buttons">
                           <span className={`status-badge ${venda.status}`}>
                             {venda.status === 'finalizado' ? 'Finalizada' : 'Pendente'}
                           </span>
