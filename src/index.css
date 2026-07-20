@@ -959,7 +959,7 @@ body {
 /* Tela dedicada de cadastro (Form Screen) */
 .form-screen {
   animation: slideInLeft var(--transition-normal);
-  max-width: 600px;
+  max-width: 650px;
   margin: 0 auto;
   width: 100%;
 }
@@ -978,7 +978,14 @@ body {
 .back-header {
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .back-header {
+    margin-bottom: 1rem;
+  }
 }
 
 .btn-back {
@@ -986,13 +993,13 @@ body {
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   transition: all var(--transition-fast);
 }
 
@@ -1230,12 +1237,13 @@ body {
   }
 }
 
-/* Carrinho de Compras em Modo Cards Mobile */
+/* Carrinho de Compras em Modo Cards */
 .cart-cards-mobile {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 .cart-card-item {
@@ -1245,37 +1253,47 @@ body {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
-  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  gap: 0.75rem;
+  transition: all var(--transition-fast);
+}
+
+.cart-card-item:hover {
+  border-color: var(--border-color-hover);
 }
 
 .cart-card-info {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
 }
 
 .cart-card-name {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cart-card-sub {
   font-size: 0.78rem;
   color: var(--text-secondary);
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
 }
 
 .cart-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 .cart-card-subtotal {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--accent-hover);
 }
 
