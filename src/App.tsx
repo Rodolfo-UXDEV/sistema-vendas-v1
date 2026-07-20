@@ -96,6 +96,10 @@ export default function App() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [checkoutVendaId, setCheckoutVendaId] = useState<string | null>(null);
 
+  // Estados e controle de lançamentos de pagamentos parciais
+  const [valorNovoPagamento, setValorNovoPagamento] = useState('');
+  const [loadingPagamento, setLoadingPagamento] = useState(false);
+
   // ==========================================
   // EFEITOS E CARREGAMENTO DE DADOS
   // ==========================================
@@ -160,6 +164,12 @@ export default function App() {
             quantidade,
             valor_unitario,
             produtos (nome, valor, imagem_url)
+          ),
+          pagamentos_venda (
+            id,
+            venda_id,
+            valor,
+            created_at
           )
         `)
         .order('created_at', { ascending: false });
@@ -657,6 +667,132 @@ export default function App() {
     } finally {
       setLoadingCheckout(false);
       setShowVendaDeleteConfirm(false);
+    }
+  };
+
+  const handleValorNovoPagamentoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let input = e.target.value.replace(/\D/g, '');
+    if (!input) {
+      setValorNovoPagamento('');
+      return;
+    }
+    const valorNumerico = parseFloat(input) / 100;
+    const formatado = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valorNumerico);
+    setValorNovoPagamento(formatado);
+  };
+
+  const handleAddPagamento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingVenda) return;
+
+    const valorNumerico = parseFloat(
+      valorNovoPagamento.replace(/[^\d,]/g, '').replace(',', '.')
+    );
+
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+      showToast('Informe um valor de pagamento válido e maior que zero.', 'error');
+      return;
+    }
+
+    setLoadingPagamento(true);
+    try {
+      const { data, error } = await supabase
+        .from('pagamentos_venda')
+        .insert([
+          {
+            venda_id: editingVenda.id,
+            valor: valorNumerico
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      showToast('Pagamento registrado com sucesso!', 'success');
+      setValorNovoPagamento('');
+
+      const pagamentosAtuais = editingVenda.pagamentos_venda || [];
+      const novosPagamentos = [...pagamentosAtuais, data];
+      const somaPagos = novosPagamentos.reduce((acc, p) => acc + p.valor, 0);
+
+      let novoStatus = editingVenda.status;
+      let novoPagoEm = editingVenda.pago_em;
+
+      if (somaPagos >= totalCarrinho && editingVenda.status !== 'finalizado') {
+        novoStatus = 'finalizado';
+        novoPagoEm = new Date().toISOString();
+        await supabase
+          .from('vendas')
+          .update({ status: 'finalizado', pago_em: novoPagoEm })
+          .eq('id', editingVenda.id);
+        setCartStatus('finalizado');
+        showToast('Venda totalmente quitada! Status alterado para Finalizado.', 'success');
+      }
+
+      setEditingVenda({
+        ...editingVenda,
+        status: novoStatus,
+        pago_em: novoPagoEm,
+        pagamentos_venda: novosPagamentos
+      });
+
+      await fetchVendas();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao registrar pagamento.', 'error');
+    } finally {
+      setLoadingPagamento(false);
+    }
+  };
+
+  const handleDeletePagamento = async (pagamentoId: string) => {
+    if (!editingVenda) return;
+
+    setLoadingPagamento(true);
+    try {
+      const { error } = await supabase
+        .from('pagamentos_venda')
+        .delete()
+        .eq('id', pagamentoId);
+
+      if (error) throw error;
+
+      showToast('Pagamento excluído com sucesso!', 'success');
+
+      const novosPagamentos = (editingVenda.pagamentos_venda || []).filter(
+        (p) => p.id !== pagamentoId
+      );
+      const somaPagos = novosPagamentos.reduce((acc, p) => acc + p.valor, 0);
+
+      let novoStatus = editingVenda.status;
+      let novoPagoEm = editingVenda.pago_em;
+
+      if (somaPagos < totalCarrinho && editingVenda.status === 'finalizado') {
+        novoStatus = 'pendente';
+        novoPagoEm = null;
+        await supabase
+          .from('vendas')
+          .update({ status: 'pendente', pago_em: null })
+          .eq('id', editingVenda.id);
+        setCartStatus('pendente');
+        showToast('Saldo pendente identificado. Status alterado para Pendente.', 'error');
+      }
+
+      setEditingVenda({
+        ...editingVenda,
+        status: novoStatus,
+        pago_em: novoPagoEm,
+        pagamentos_venda: novosPagamentos
+      });
+
+      await fetchVendas();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao excluir pagamento.', 'error');
+    } finally {
+      setLoadingPagamento(false);
     }
   };
 
@@ -1690,6 +1826,20 @@ export default function App() {
                       <div className="sale-action-zone">
                         <div className="sale-price-box">
                           <div className="sale-total">{formatCurrency(venda.valor_total)}</div>
+                          {(() => {
+                            const totalAbatido = (venda.pagamentos_venda || []).reduce((acc, p) => acc + p.valor, 0);
+                            const restante = Math.max(0, venda.valor_total - totalAbatido);
+                            if (totalAbatido > 0 && venda.status === 'pendente') {
+                              return (
+                                <div style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                                  <span style={{ color: 'var(--success)' }}>Pago: {formatCurrency(totalAbatido)}</span>
+                                  <br />
+                                  <span style={{ color: 'var(--accent)', fontWeight: 600 }}>Resta: {formatCurrency(restante)}</span>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                           <div className="sale-qty">
                             {venda.itens_venda?.reduce((s, i) => s + i.quantidade, 0) || 0} itens no total
                           </div>
@@ -1976,6 +2126,109 @@ export default function App() {
                 </>
               )}
             </div>
+
+            {/* Sessão de Lançamento de Pagamentos Parciais (Exclusiva da Tela de Edição) */}
+            {editingVenda && !checkoutSuccess && (
+              <section className="card" style={{ marginTop: '1.5rem' }}>
+                <h2 className="card-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--accent)'}}><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Lançamento de Pagamentos e Abatimentos
+                </h2>
+
+                {/* Formulário de adicionar pagamento */}
+                <form onSubmit={handleAddPagamento} style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                  <div className="form-group" style={{ flex: 1, minWidth: '220px', marginBottom: 0 }}>
+                    <label htmlFor="valorNovoPagamento" className="form-label">Registrar Valor Pago (R$)</label>
+                    <input
+                      id="valorNovoPagamento"
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: R$ 50,00"
+                      value={valorNovoPagamento}
+                      onChange={handleValorNovoPagamentoChange}
+                      disabled={loadingPagamento}
+                      autoComplete="off"
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="btn" 
+                    style={{ width: 'auto', padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }} 
+                    disabled={loadingPagamento || !valorNovoPagamento}
+                  >
+                    {loadingPagamento ? (
+                      <>
+                        <div className="spinner"></div>
+                        Lançando...
+                      </>
+                    ) : (
+                      '+ Lançar Pagamento'
+                    )}
+                  </button>
+                </form>
+
+                {/* Histórico de pagamentos lançados */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', fontWeight: 600 }}>
+                    Histórico de Pagamentos Lançados ({(editingVenda.pagamentos_venda || []).length})
+                  </h4>
+
+                  {(!editingVenda.pagamentos_venda || editingVenda.pagamentos_venda.length === 0) ? (
+                    <div className="empty-state" style={{ padding: '1.5rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhum pagamento parcial registrado para esta venda ainda.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {editingVenda.pagamentos_venda.map((pag) => (
+                        <div key={pag.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--success)' }}>
+                              + {formatCurrency(pag.valor)}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                              Lançado em: {formatDate(pag.created_at)}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-remove-item"
+                            onClick={() => handleDeletePagamento(pag.id)}
+                            disabled={loadingPagamento}
+                            title="Excluir este pagamento"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Resumo Financeiro da Venda */}
+                {(() => {
+                  const totalPagos = (editingVenda.pagamentos_venda || []).reduce((acc, p) => acc + p.valor, 0);
+                  const restante = Math.max(0, totalCarrinho - totalPagos);
+                  return (
+                    <div style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <span>Valor Total da Compra:</span>
+                        <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalCarrinho)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <span>Total Pago (Abatido):</span>
+                        <strong style={{ color: 'var(--success)' }}>{formatCurrency(totalPagos)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', fontWeight: 700 }}>
+                        <span>Valor Restante para Pagamento:</span>
+                        <strong style={{ color: restante > 0 ? 'var(--accent)' : 'var(--success)' }}>
+                          {formatCurrency(restante)}
+                        </strong>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </section>
+            )}
           </main>
         )
       )}

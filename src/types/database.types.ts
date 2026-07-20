@@ -31,6 +31,13 @@ export interface ItemVenda {
   produtos?: { nome: string; valor: number; imagem_url: string | null }; // Detalhe do produto (join)
 }
 
+export interface PagamentoVenda {
+  id: string;               // UUID do pagamento
+  venda_id: string;         // FK para vendas(id)
+  valor: number;            // Valor abatido
+  created_at: string;       // Data/hora do lançamento do pagamento
+}
+
 export interface Venda {
   id: string;               // UUID gerado automaticamente
   created_at: string;       // Data/hora da venda
@@ -42,9 +49,10 @@ export interface Venda {
   // Relacionamentos expandidos
   clientes?: { nome: string; telefone: string };
   itens_venda?: ItemVenda[];
+  pagamentos_venda?: PagamentoVenda[];
 }
 
-export type VendaInsert = Omit<Venda, 'id' | 'created_at' | 'pago_em' | 'clientes' | 'itens_venda'>;
+export type VendaInsert = Omit<Venda, 'id' | 'created_at' | 'pago_em' | 'clientes' | 'itens_venda' | 'pagamentos_venda'>;
 export type ItemVendaInsert = Omit<ItemVenda, 'id' | 'produtos'>;
 
 
