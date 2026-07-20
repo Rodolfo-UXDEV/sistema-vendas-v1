@@ -21,7 +21,7 @@ interface CartItem {
 
 export default function App() {
   // Controle de abas principais
-  const [activeTab, setActiveTab] = useState<Tab>('clientes');
+  const [activeTab, setActiveTab] = useState<Tab>('vendas');
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Estados para navegação de sub-telas (Mobile-First)
