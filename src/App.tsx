@@ -1908,9 +1908,9 @@ export default function App() {
               </h2>
             </div>
 
-            <div className="grid" style={{ marginTop: '1rem' }}>
-              {checkoutSuccess ? (
-                /* Recibo de Sucesso com Compartilhamento de WhatsApp */
+            {checkoutSuccess ? (
+              /* Recibo de Sucesso com Compartilhamento de WhatsApp */
+              <div className="grid" style={{ marginTop: '1rem' }}>
                 <section className="card success-screen" style={{ gridColumn: '1 / -1' }}>
                   <div className="success-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1942,9 +1942,11 @@ export default function App() {
                     </button>
                   </div>
                 </section>
-              ) : (
-                /* Fluxo normal de compras (Carrinho) */
-                <>
+              </div>
+            ) : (
+              /* Fluxo normal de compras (Carrinho) */
+              <form onSubmit={handleCheckout}>
+                <div className="grid" style={{ marginTop: '1rem' }}>
                   {/* Coluna da esquerda: Formulário de adição de itens */}
                   <section className="card">
                     <h2 className="card-title">
@@ -1952,7 +1954,7 @@ export default function App() {
                       Adicionar ao Carrinho
                     </h2>
 
-                    <form onSubmit={handleAddToCart}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <div className="form-group">
                         <label htmlFor="cartProduto" className="form-label">Produto</label>
                         {produtos.length === 0 ? (
@@ -1963,7 +1965,6 @@ export default function App() {
                             className="form-select"
                             value={currentProdutoId}
                             onChange={(e) => setCurrentProdutoId(e.target.value)}
-                            required
                           >
                             <option value="">-- Selecione o Produto --</option>
                             {produtos.map((p) => (
@@ -1992,7 +1993,6 @@ export default function App() {
                             className="form-input qty-input"
                             value={currentQuantidade}
                             onChange={(e) => setCurrentQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
-                            required
                           />
                           <button 
                             type="button" 
@@ -2005,16 +2005,17 @@ export default function App() {
                       </div>
 
                       <button 
-                        type="submit" 
+                        type="button" 
                         className="btn" 
+                        onClick={handleAddToCart}
                         disabled={produtos.length === 0 || !currentProdutoId}
                       >
                         Adicionar Item
                       </button>
-                    </form>
+                    </div>
                   </section>
 
-                  {/* Coluna da direita: Visualização do Carrinho e Finalização */}
+                  {/* Coluna da direita: Visualização do Carrinho */}
                   <section className="card">
                     <h2 className="card-title">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--accent)'}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -2051,183 +2052,186 @@ export default function App() {
                           ))}
                         </div>
 
-                        {/* Caixa de Fechamento */}
-                        <form onSubmit={handleCheckout}>
-                          <div className="form-group">
-                            <label htmlFor="cartCliente" className="form-label">Cliente da Compra</label>
-                            {clientes.length === 0 ? (
-                              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Cadastre um cliente antes de prosseguir.</p>
-                            ) : (
-                              <select
-                                id="cartCliente"
-                                className="form-select"
-                                value={cartClienteId}
-                                onChange={(e) => setCartClienteId(e.target.value)}
-                                required
-                              >
-                                <option value="">-- Selecione o Cliente --</option>
-                                {clientes.map((c) => (
-                                  <option key={c.id} value={c.id}>{c.nome} {c.telefone ? `(${c.telefone})` : ''}</option>
-                                ))}
-                              </select>
-                            )}
-                          </div>
-
-                          <div className="form-group">
-                            <label htmlFor="cartStatusVenda" className="form-label">Status do Pagamento</label>
+                        {/* Dados de Fechamento */}
+                        <div className="form-group" style={{ marginTop: '1rem' }}>
+                          <label htmlFor="cartCliente" className="form-label">Cliente da Compra</label>
+                          {clientes.length === 0 ? (
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Cadastre um cliente antes de prosseguir.</p>
+                          ) : (
                             <select
-                              id="cartStatusVenda"
+                              id="cartCliente"
                               className="form-select"
-                              value={cartStatus}
-                              onChange={(e) => setCartStatus(e.target.value as any)}
+                              value={cartClienteId}
+                              onChange={(e) => setCartClienteId(e.target.value)}
                               required
                             >
-                              <option value="pendente">Pendente de Pagamento</option>
-                              <option value="finalizado">Finalizado (Pago)</option>
+                              <option value="">-- Selecione o Cliente --</option>
+                              {clientes.map((c) => (
+                                <option key={c.id} value={c.id}>{c.nome} {c.telefone ? `(${c.telefone})` : ''}</option>
+                              ))}
                             </select>
-                          </div>
+                          )}
+                        </div>
 
-                          {/* Totalizador */}
-                          <div className="total-preview-box">
-                            <span className="total-preview-label">Total do Pedido</span>
-                            <span className="total-preview-value">{formatCurrency(totalCarrinho)}</span>
-                          </div>
+                        <div className="form-group">
+                          <label htmlFor="cartStatusVenda" className="form-label">Status do Pagamento</label>
+                          <select
+                            id="cartStatusVenda"
+                            className="form-select"
+                            value={cartStatus}
+                            onChange={(e) => setCartStatus(e.target.value as any)}
+                            required
+                          >
+                            <option value="pendente">Pendente de Pagamento</option>
+                            <option value="finalizado">Finalizado (Pago)</option>
+                          </select>
+                        </div>
 
-                          <button 
-                            type="submit" 
-                            className="btn" 
-                            disabled={loadingCheckout || !cartClienteId || cart.length === 0}
-                          >
-                            {loadingCheckout ? (
-                              <>
-                                <div className="spinner"></div>
-                                {editingVenda ? 'Salvando...' : 'Finalizando...'}
-                              </>
-                            ) : (
-                              editingVenda ? 'Salvar Alterações' : 'Finalizar Venda'
-                            )}
-                          </button>
-                        </form>
-                        {editingVenda && (
-                          <button
-                            type="button"
-                            className="btn btn-danger-outline"
-                            style={{ marginTop: '1.25rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                            onClick={() => setShowVendaDeleteConfirm(true)}
-                            disabled={loadingCheckout}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            Excluir Venda
-                          </button>
-                        )}
+                        {/* Totalizador */}
+                        <div className="total-preview-box" style={{ marginBottom: 0 }}>
+                          <span className="total-preview-label">Total do Pedido</span>
+                          <span className="total-preview-value">{formatCurrency(totalCarrinho)}</span>
+                        </div>
                       </>
                     )}
                   </section>
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Sessão de Lançamento de Pagamentos Parciais (Exclusiva da Tela de Edição) */}
-            {editingVenda && !checkoutSuccess && (
-              <section className="card" style={{ marginTop: '1.5rem' }}>
-                <h2 className="card-title">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--accent)'}}><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  Lançamento de Pagamentos e Abatimentos
-                </h2>
+                {/* Sessão de Lançamento de Pagamentos Parciais (Exclusiva da Tela de Edição) */}
+                {editingVenda && (
+                  <section className="card" style={{ marginTop: '1.5rem' }}>
+                    <h2 className="card-title">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{color: 'var(--accent)'}}><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                      Lançamento de Pagamentos e Abatimentos
+                    </h2>
 
-                {/* Formulário de adicionar pagamento */}
-                <form onSubmit={handleAddPagamento} style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                  <div className="form-group" style={{ flex: 1, minWidth: '220px', marginBottom: 0 }}>
-                    <label htmlFor="valorNovoPagamento" className="form-label">Registrar Valor Pago (R$)</label>
-                    <input
-                      id="valorNovoPagamento"
-                      type="text"
-                      className="form-input"
-                      placeholder="Ex: R$ 50,00"
-                      value={valorNovoPagamento}
-                      onChange={handleValorNovoPagamentoChange}
-                      disabled={loadingPagamento}
-                      autoComplete="off"
-                    />
-                  </div>
+                    {/* Formulário de adicionar pagamento */}
+                    <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                      <div className="form-group" style={{ flex: 1, minWidth: '220px', marginBottom: 0 }}>
+                        <label htmlFor="valorNovoPagamento" className="form-label">Registrar Valor Pago (R$)</label>
+                        <input
+                          id="valorNovoPagamento"
+                          type="text"
+                          className="form-input"
+                          placeholder="Ex: R$ 50,00"
+                          value={valorNovoPagamento}
+                          onChange={handleValorNovoPagamentoChange}
+                          disabled={loadingPagamento}
+                          autoComplete="off"
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        className="btn" 
+                        style={{ width: 'auto', padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }} 
+                        onClick={handleAddPagamento}
+                        disabled={loadingPagamento || !valorNovoPagamento}
+                      >
+                        {loadingPagamento ? (
+                          <>
+                            <div className="spinner"></div>
+                            Lançando...
+                          </>
+                        ) : (
+                          '+ Lançar Pagamento'
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Histórico de pagamentos lançados */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', fontWeight: 600 }}>
+                        Histórico de Pagamentos Lançados ({(editingVenda.pagamentos_venda || []).length})
+                      </h4>
+
+                      {(!editingVenda.pagamentos_venda || editingVenda.pagamentos_venda.length === 0) ? (
+                        <div className="empty-state" style={{ padding: '1.5rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhum pagamento parcial registrado para esta venda ainda.</p>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {editingVenda.pagamentos_venda.map((pag) => (
+                            <div key={pag.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--success)' }}>
+                                  + {formatCurrency(pag.valor)}
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                  Lançado em: {formatDate(pag.created_at)}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="btn-remove-item"
+                                onClick={() => handleDeletePagamento(pag.id)}
+                                disabled={loadingPagamento}
+                                title="Excluir este pagamento"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Resumo Financeiro da Venda */}
+                    {(() => {
+                      const totalPagos = (editingVenda.pagamentos_venda || []).reduce((acc, p) => acc + p.valor, 0);
+                      const restante = Math.max(0, totalCarrinho - totalPagos);
+                      return (
+                        <div style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            <span>Valor Total da Compra:</span>
+                            <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalCarrinho)}</strong>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            <span>Total Pago (Abatido):</span>
+                            <strong style={{ color: 'var(--success)' }}>{formatCurrency(totalPagos)}</strong>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', fontWeight: 700 }}>
+                            <span>Valor Restante para Pagamento:</span>
+                            <strong style={{ color: restante > 0 ? 'var(--accent)' : 'var(--success)' }}>
+                              {formatCurrency(restante)}
+                            </strong>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </section>
+                )}
+
+                {/* Bloco Final de Ações da Venda (Guardar Alterações e Excluir) */}
+                <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <button 
                     type="submit" 
                     className="btn" 
-                    style={{ width: 'auto', padding: '0.75rem 1.25rem', whiteSpace: 'nowrap' }} 
-                    disabled={loadingPagamento || !valorNovoPagamento}
+                    disabled={loadingCheckout || !cartClienteId || cart.length === 0}
                   >
-                    {loadingPagamento ? (
+                    {loadingCheckout ? (
                       <>
                         <div className="spinner"></div>
-                        Lançando...
+                        {editingVenda ? 'Guardando...' : 'Finalizando...'}
                       </>
                     ) : (
-                      '+ Lançar Pagamento'
+                      editingVenda ? 'Guardar Alterações' : 'Finalizar Venda'
                     )}
                   </button>
-                </form>
 
-                {/* Histórico de pagamentos lançados */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', fontWeight: 600 }}>
-                    Histórico de Pagamentos Lançados ({(editingVenda.pagamentos_venda || []).length})
-                  </h4>
-
-                  {(!editingVenda.pagamentos_venda || editingVenda.pagamentos_venda.length === 0) ? (
-                    <div className="empty-state" style={{ padding: '1.5rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhum pagamento parcial registrado para esta venda ainda.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {editingVenda.pagamentos_venda.map((pag) => (
-                        <div key={pag.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--success)' }}>
-                              + {formatCurrency(pag.valor)}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                              Lançado em: {formatDate(pag.created_at)}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            className="btn-remove-item"
-                            onClick={() => handleDeletePagamento(pag.id)}
-                            disabled={loadingPagamento}
-                            title="Excluir este pagamento"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                  {editingVenda && (
+                    <button
+                      type="button"
+                      className="btn btn-danger-outline"
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                      onClick={() => setShowVendaDeleteConfirm(true)}
+                      disabled={loadingCheckout}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      Excluir Venda
+                    </button>
                   )}
                 </div>
-
-                {/* Resumo Financeiro da Venda */}
-                {(() => {
-                  const totalPagos = (editingVenda.pagamentos_venda || []).reduce((acc, p) => acc + p.valor, 0);
-                  const restante = Math.max(0, totalCarrinho - totalPagos);
-                  return (
-                    <div style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        <span>Valor Total da Compra:</span>
-                        <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalCarrinho)}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        <span>Total Pago (Abatido):</span>
-                        <strong style={{ color: 'var(--success)' }}>{formatCurrency(totalPagos)}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', fontWeight: 700 }}>
-                        <span>Valor Restante para Pagamento:</span>
-                        <strong style={{ color: restante > 0 ? 'var(--accent)' : 'var(--success)' }}>
-                          {formatCurrency(restante)}
-                        </strong>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </section>
+              </form>
             )}
           </main>
         )
