@@ -16,6 +16,7 @@ export interface Produto {
   created_at: string;     // Data/hora de criação do produto
   nome: string;           // Nome do produto
   valor: number;          // Preço/valor decimal do produto
+  quantidade: number;     // Quantidade disponível no estoque
   imagem_url: string | null; // URL da imagem armazenada no Supabase Storage ou externa
 }
 

@@ -103,15 +103,18 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
 
 ## [2026-07-20] - Correção de Compatibilidade para Deploy no GitHub Pages
 
+### Adicionado
+- **Campo de Quantidade em Estoque:** Adicionada a coluna `quantidade` na tabela `produtos` do Supabase e nas tipagens TypeScript ([src/types/database.types.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/types/database.types.ts)).
+- **Formulários de Cadastro/Edição de Produto:** Adicionado o campo numérico "Quantidade em Estoque" no cadastro e na edição de produtos em [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx).
+- **Validação e Débito Automático de Estoque:** Ao adicionar produtos ao carrinho, a aplicação valida se a quantidade desejada está disponível em estoque. Ao concluir ou atualizar uma venda, a quantidade de produtos vendidos é debitada automaticamente do estoque no banco de dados.
+
 ### Modificado
-- [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx): Substituída a tabela no carrinho de compras pela exibição em cartões compactos (`cart-card-item`), trazendo a listagem visual limpa do carrinho para todas as telas.
-- [src/index.css](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/index.css): Reduzidos os espaçamentos das telas de formulário (`.form-screen`, `.back-header`) e refinado o estilo de `.cart-card-item` com truncação de texto (`ellipsis`) e padding reduzido para máximo aproveitamento em dispositivos móveis.
+- [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx): Exibido o badge de unidades em estoque na listagem de produtos e informada a quantidade disponível no dropdown de seleção de produtos durante a venda.
+- [src/index.css](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/index.css): Reduzidos os espaçamentos das telas de formulário (`.form-screen`, `.back-header`) e refinado o estilo de `.cart-card-item`.
 - [index.html](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/index.html): Adicionadas as diretrizes `translate="no"`, `class="notranslate"` e a meta tag `<meta name="google" content="notranslate" />` para impedir a tradução automática do Google Tradutor na aplicação.
-- [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Ajustada a propriedade `base` para `'/sistema-vendas-v1/'` (caminho absoluto sob o nome do repositório) garantindo resolução correta de scripts JS and CSS no GitHub Pages com ou sem barra final na URL.
-- [package.json](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/package.json): Atualizado o script de build para copiar `dist/index.html` para `dist/404.html`, fornecendo fallback para recarregamentos de página em SPAs no GitHub Pages.
-- [src/lib/supabase.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/lib/supabase.ts): Adicionados valores de fallback padrão para `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
+- [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Ajustada a propriedade `base` para `'/sistema-vendas-v1/'` (caminho absoluto sob o nome do repositório) garantindo resolução correta de scripts no GitHub Pages.
 
 ### Corrigido
-- **Interface do Carrinho de Compras:** Removida a tabela e reestabelecido o visual em cartões compactos (`cart-card-item`), eliminando o estouro horizontal de tabela e reduzindo espaçamentos.
-- **Adaptação Mobile da Aba de Vendas:** Otimizados os cartões de venda, lista interna de produtos, alinhamento dos botões de ação e sub-abas de status para se adaptarem automaticamente a qualquer largura de tela.
+- **Interface do Carrinho de Compras:** Removida a tabela e reestabelecido o visual em cartões compactos (`cart-card-item`).
+- **Adaptação Mobile da Aba de Vendas:** Otimizados os cartões de venda, lista interna de produtos e alinhamento dos botões de ação para se adaptarem automaticamente a qualquer largura de tela.
 - **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React em amientes estáticos.

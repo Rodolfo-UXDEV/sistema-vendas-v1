@@ -35,6 +35,7 @@ export default function App() {
   const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
   const [nomeEditProduto, setNomeEditProduto] = useState('');
   const [valorEditProduto, setValorEditProduto] = useState('');
+  const [quantidadeEditProduto, setQuantidadeEditProduto] = useState('0');
   const [imagemEditPreview, setImagemEditPreview] = useState<string | null>(null);
   const [selectedEditFile, setSelectedEditFile] = useState<File | null>(null);
   const [showProductDeleteConfirm, setShowProductDeleteConfirm] = useState(false);
@@ -61,6 +62,7 @@ export default function App() {
   // ==========================================
   const [nomeProduto, setNomeProduto] = useState('');
   const [valorProduto, setValorProduto] = useState('');
+  const [quantidadeProduto, setQuantidadeProduto] = useState('0');
   const [imagemArquivo, setImagemArquivo] = useState<File | null>(null);
   const [imagemPreview, setImagemPreview] = useState<string | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -318,6 +320,7 @@ export default function App() {
     setEditingProduto(null);
     setNomeEditProduto('');
     setValorEditProduto('');
+    setQuantidadeEditProduto('0');
     setImagemEditPreview(null);
     setSelectedEditFile(null);
     setShowProductDeleteConfirm(false);
@@ -437,6 +440,7 @@ export default function App() {
     const valorNumerico = parseFloat(
       valorProduto.replace(/[^\d,]/g, '').replace(',', '.')
     );
+    const qtdEstoque = parseInt(quantidadeProduto) || 0;
 
     if (!nomeLimpo || nomeLimpo.length < 2) {
       showToast('O nome do produto deve conter pelo menos 2 caracteres.', 'error');
@@ -444,6 +448,10 @@ export default function App() {
     }
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
       showToast('Informe um valor de produto válido e maior que zero.', 'error');
+      return;
+    }
+    if (isNaN(qtdEstoque) || qtdEstoque < 0) {
+      showToast('Informe uma quantidade de estoque válida.', 'error');
       return;
     }
 
@@ -473,6 +481,7 @@ export default function App() {
         {
           nome: nomeLimpo,
           valor: valorNumerico,
+          quantidade: qtdEstoque,
           imagem_url: publicImageUrl
         }
       ]);
@@ -481,6 +490,7 @@ export default function App() {
       showToast('Produto cadastrado com sucesso!', 'success');
       setNomeProduto('');
       setValorProduto('');
+      setQuantidadeProduto('0');
       setImagemArquivo(null);
       setImagemPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -501,6 +511,7 @@ export default function App() {
     const valorNumerico = parseFloat(
       valorEditProduto.replace(/[^\d,]/g, '').replace(',', '.')
     );
+    const qtdEstoque = parseInt(quantidadeEditProduto) || 0;
 
     if (!nomeLimpo || nomeLimpo.length < 2) {
       showToast('O nome do produto deve conter pelo menos 2 caracteres.', 'error');
@@ -508,6 +519,10 @@ export default function App() {
     }
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
       showToast('Informe um valor de produto válido e maior que zero.', 'error');
+      return;
+    }
+    if (isNaN(qtdEstoque) || qtdEstoque < 0) {
+      showToast('Informe uma quantidade de estoque válida.', 'error');
       return;
     }
 
@@ -542,6 +557,7 @@ export default function App() {
         .update({
           nome: nomeLimpo,
           valor: valorNumerico,
+          quantidade: qtdEstoque,
           imagem_url: publicImageUrl
         })
         .eq('id', editingProduto.id);
@@ -666,6 +682,15 @@ export default function App() {
     if (!prod) return;
 
     const existingItem = cart.find((item) => item.produtoId === currentProdutoId);
+    const qtdAtualCarrinho = existingItem ? existingItem.quantidade : 0;
+    const totalSolicitado = qtdAtualCarrinho + currentQuantidade;
+    const estoqueDisponivel = prod.quantidade ?? 0;
+
+    if (totalSolicitado > estoqueDisponivel) {
+      showToast(`Estoque insuficiente! Disponível em estoque: ${estoqueDisponivel} un.`, 'error');
+      return;
+    }
+
     if (existingItem) {
       setCart(
         cart.map((item) =>
@@ -750,7 +775,20 @@ export default function App() {
 
         if (insertError) throw insertError;
 
-        showToast('Venda atualizada com sucesso!', 'success');
+        // 5. Debita a quantidade de produtos vendidos do estoque
+        for (const item of cart) {
+          const prodOriginal = produtos.find((p) => p.id === item.produtoId);
+          if (prodOriginal) {
+            const novaQtd = Math.max(0, (prodOriginal.quantidade || 0) - item.quantidade);
+            await supabase
+              .from('produtos')
+              .update({ quantidade: novaQtd })
+              .eq('id', item.produtoId);
+          }
+        }
+
+        await fetchProdutos();
+        showToast('Venda atualizada e estoque debitado!', 'success');
         await fetchVendas();
         resetNovaVenda();
       } else {
@@ -787,6 +825,20 @@ export default function App() {
 
         if (itensError) throw itensError;
 
+        // 4. Debita a quantidade de produtos vendidos do estoque
+        for (const item of cart) {
+          const prodOriginal = produtos.find((p) => p.id === item.produtoId);
+          if (prodOriginal) {
+            const novaQtd = Math.max(0, (prodOriginal.quantidade || 0) - item.quantidade);
+            await supabase
+              .from('produtos')
+              .update({ quantidade: novaQtd })
+              .eq('id', item.produtoId);
+          }
+        }
+
+        await fetchProdutos();
+
         // Sucesso na transação
         setCheckoutVendaId(novaVenda.id);
         
@@ -799,7 +851,7 @@ export default function App() {
         setCartStatus('pendente');
         setCheckoutSuccess(true);
         
-        showToast('Venda finalizada com sucesso!', 'success');
+        showToast('Venda finalizada e estoque debitado com sucesso!', 'success');
       }
     } catch (err: any) {
       showToast(err.message || 'Erro ao processar venda no banco.', 'error');
@@ -1251,7 +1303,12 @@ export default function App() {
                             </div>
                             <div className="product-info-vertical">
                               <h3 className="product-name-vertical">{produto.nome}</h3>
-                              <p className="product-price-vertical">{formatCurrency(produto.valor)}</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span className="product-price-vertical">{formatCurrency(produto.valor)}</span>
+                                <span style={{ fontSize: '0.78rem', color: produto.quantidade > 0 ? 'var(--text-secondary)' : 'var(--danger)', fontWeight: 500 }}>
+                                  Estoque: {produto.quantidade ?? 0} un.
+                                </span>
+                              </div>
                             </div>
                             <button
                               type="button"
@@ -1261,6 +1318,7 @@ export default function App() {
                                 setEditingProduto(produto);
                                 setNomeEditProduto(produto.nome);
                                 setValorEditProduto(formatCurrency(produto.valor).replace('R$', '').trim());
+                                setQuantidadeEditProduto((produto.quantidade ?? 0).toString());
                                 setImagemEditPreview(produto.imagem_url);
                                 setSelectedEditFile(null);
                                 setViewProduto('edit');
@@ -1338,6 +1396,21 @@ export default function App() {
                     disabled={loadingProduto}
                     required
                     autoComplete="off"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="quantidadeProduto" className="form-label">Quantidade em Estoque</label>
+                  <input
+                    id="quantidadeProduto"
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    placeholder="Ex: 10"
+                    value={quantidadeProduto}
+                    onChange={(e) => setQuantidadeProduto(e.target.value)}
+                    disabled={loadingProduto}
+                    required
                   />
                 </div>
 
@@ -1442,6 +1515,21 @@ export default function App() {
                     disabled={loadingProduto}
                     required
                     autoComplete="off"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="quantidadeEditProduto" className="form-label">Quantidade em Estoque</label>
+                  <input
+                    id="quantidadeEditProduto"
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    placeholder="Ex: 10"
+                    value={quantidadeEditProduto}
+                    onChange={(e) => setQuantidadeEditProduto(e.target.value)}
+                    disabled={loadingProduto}
+                    required
                   />
                 </div>
 
@@ -1729,7 +1817,9 @@ export default function App() {
                           >
                             <option value="">-- Selecione o Produto --</option>
                             {produtos.map((p) => (
-                              <option key={p.id} value={p.id}>{p.nome} - ({formatCurrency(p.valor)})</option>
+                              <option key={p.id} value={p.id} disabled={(p.quantidade ?? 0) <= 0}>
+                                {p.nome} - {formatCurrency(p.valor)} | Estoque: {p.quantidade ?? 0} un.{(p.quantidade ?? 0) <= 0 ? ' (Esgotado)' : ''}
+                              </option>
                             ))}
                           </select>
                         )}
