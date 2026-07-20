@@ -101,23 +101,31 @@ Este arquivo registra cronologicamente todas as decisões, alterações, avanço
 
 ---
 
-## [2026-07-20] - Correção de Compatibilidade para Deploy no GitHub Pages
+## [2026-07-20] - Gestão de Estoque, Lançamento de Pagamentos Parciais, Redesign Rosa/Branco e Publicação
 
 ### Adicionado
-- **Tabela de Pagamentos Parciais no Supabase:** Criada a tabela `public.pagamentos_venda` no banco de dados Supabase e adicionadas as tipagens `PagamentoVenda` em [src/types/database.types.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/types/database.types.ts).
+- **Tabela de Pagamentos Parciais no Supabase:** Criada a tabela `public.pagamentos_venda` (`id`, `venda_id`, `valor`, `created_at`) com políticas públicas de RLS (SELECT, INSERT, DELETE) e adicionadas as tipagens `PagamentoVenda` em [src/types/database.types.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/types/database.types.ts).
 - **Lançamento e Abatimento de Pagamentos na Tela de Edição:** Criada a seção "Lançamento de Pagamentos e Abatimentos" em [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx) permitindo inserir novos valores pagos em parcelas/abatimentos, visualizar histórico com data e horário de lançamento, excluir pagamentos individuais e visualizar o resumo financeiro com **Valor Total da Compra**, **Total Pago (Abatido)** e **Valor Restante para Pagamento**.
-- **Atualização Automática de Status:** Ao lançar um pagamento que quite o saldo restante, a venda é automaticamente finalizada. Se um pagamento for excluído tornando o saldo restante maior que zero, a venda é reconvertida para pendente.
+- **Atualização Automática de Status por Saldo:** Ao lançar um pagamento que quite o saldo restante, a venda é automaticamente finalizada. Se um pagamento for excluído tornando o saldo restante maior que zero, a venda é reconvertida para pendente.
+- **Indicador de Abatimentos na Listagem de Vendas:** Nos cartões da lista de vendas pendentes, caso existam pagamentos parciais registrados, o sistema exibe em tempo real o **Valor Pago** e o **Saldo Restante**.
 - **Campo de Quantidade em Estoque:** Adicionada a coluna `quantidade` na tabela `produtos` do Supabase e nas tipagens TypeScript ([src/types/database.types.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/types/database.types.ts)).
-- **Formulários de Cadastro/Edição de Produto:** Adicionado o campo numérico "Quantidade em Estoque" no cadastro e na edição de produtos em [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx).
+- **Formulários de Cadastro/Edição de Produto com Estoque:** Adicionado o campo numérico "Quantidade em Estoque" no cadastro e na edição de produtos em [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx).
 - **Validação e Débito Automático de Estoque:** Ao adicionar produtos ao carrinho, a aplicação valida se a quantidade desejada está disponível em estoque. Ao concluir ou atualizar uma venda, a quantidade de produtos vendidos é debitada automaticamente do estoque no banco de dados.
+- **Bloqueio do Google Tradutor:** Adicionadas a meta tag `<meta name="google" content="notranslate" />` e o atributo `translate="no"` na tag `<html>` do [index.html](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/index.html) para evitar interferência na renderização.
 
 ### Modificado
-- [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx): Reorganizada a tela de edição de vendas, posicionando os botões finais de ação (**"Guardar Alterações"** e **"Excluir Venda"**) no rodapé da página após todos os blocos de produtos, cliente, status e pagamentos parciais.
-- [src/index.css](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/index.css): Reformulada a paleta de cores para um tema leve e elegante com **fundo limpo em branco/off-white (`#f8fafc`, `#ffffff`)** e **detalhes sofisticados em tons de rosa vibrante (`#ec4899`, `#db2777`)**, incluindo reajuste de sombras, inputs com `color-scheme: light`, fundos de modais e barra de navegação responsiva.
-- [index.html](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/index.html): Adicionadas as diretrizes `translate="no"`, `class="notranslate"` e a meta tag `<meta name="google" content="notranslate" />` para impedir a tradução automática do Google Tradutor na aplicação.
+- [src/App.tsx](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/App.tsx): 
+  - Definida a aba de **Vendas** (`activeTab = 'vendas'`) como a tela inicial padrão ao acessar a aplicação.
+  - Substituído o ícone de relógio da aba de Vendas por um ícone SVG de **Sacola de Compras** (`shopping-bag`).
+  - Reorganizado o layout da tela de edição de vendas, posicionando o bloco final de ações (**"Guardar Alterações"** e **"Excluir Venda"**) no rodapé da página após todos os blocos de produtos, cliente, status e pagamentos parciais.
+  - Alterada a nomenclatura do botão principal de salvamento de edição de **"Salvar Alterações"** para **"Guardar Alterações"**.
+- [src/index.css](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/src/index.css): Reformulada a paleta de cores para um tema leve e elegante com **fundo limpo em branco/off-white (`#f8fafc`, `#ffffff`)** e **detalhes em tons de rosa vibrante (`#ec4899`, `#db2777`)**, incluindo reajuste de sombras, inputs com `color-scheme: light`, fundos de modais e barra de navegação responsiva.
 - [vite.config.ts](file:///c:/Users/RodolfoRodriguesdoNa/.gemini/antigravity-ide/scratch/sistema-vendas-v1/vite.config.ts): Ajustada a propriedade `base` para `'/sistema-vendas-v1/'` (caminho absoluto sob o nome do repositório) garantindo resolução correta de scripts no GitHub Pages.
 
 ### Corrigido
-- **Interface do Carrinho de Compras:** Removida a tabela e reestabelecido o visual em cartões compactos (`cart-card-item`).
-- **Adaptação Mobile da Aba de Vendas:** Otimizados os cartões de venda, lista interna de produtos e alinhamento dos botões de ação para se adaptarem automaticamente a qualquer largura de tela.
-- **Tela Branca no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial do React em amientes estáticos.
+- **Interface do Carrinho de Compras:** Removida a tabela inferior duplicada e reestabelecido o visual limpo em cartões compactos (`cart-card-item`).
+- **Adaptação Mobile da Aba de Vendas:** Otimizados os cartões de venda, lista interna de produtos e alinhamento dos botões de ação para se adaptarem automaticamente a qualquer largura de tela de celular.
+- **Deploy no GitHub Pages:** Resolvida a falha de carregamento de assets estáticos e o travamento inicial no ambiente do GitHub Pages.
+
+### Analisado
+- **Auditoria de Persistência no Banco de Dados:** Realizada verificação completa do código-fonte confirmando que 100% dos dados cadastrados e editados (Clientes, Produtos com Imagem e Estoque, Vendas Mestre/Detalhe e Lançamentos de Pagamentos) estão devidamente conectados e salvos no banco PostgreSQL do Supabase e Supabase Storage.
